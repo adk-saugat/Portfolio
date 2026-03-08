@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
-const resumePdf = "/SaugatAdhikariResumeV2.pdf";
-const profileImage = "/Profile.JPEG";
+const resumePdf = `${import.meta.env.BASE_URL}SaugatAdhikariResumeV2.pdf`;
+const profileImage = `${import.meta.env.BASE_URL}Profile.JPEG`;
 
 const LINKS = {
   github: "https://github.com/adk-saugat",
@@ -102,7 +102,7 @@ function useFade(delay = 0, rootMargin = "-60px") {
           observer.disconnect();
         }
       },
-      { rootMargin }
+      { rootMargin },
     );
 
     observer.observe(el);
@@ -177,12 +177,29 @@ function ProjectRow({ project, index }) {
                 >
                   {project.name}
                 </h3>
-                <p style={{ fontSize: "0.875rem", color: "#9ca3af", margin: "4px 0 0", fontStyle: "italic" }}>
+                <p
+                  style={{
+                    fontSize: "0.875rem",
+                    color: "#9ca3af",
+                    margin: "4px 0 0",
+                    fontStyle: "italic",
+                  }}
+                >
                   {project.tagline}
                 </p>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <span style={{ fontSize: "0.72rem", color: "#d1d5db", fontWeight: 500 }}>{project.year}</span>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              >
+                <span
+                  style={{
+                    fontSize: "0.72rem",
+                    color: "#d1d5db",
+                    fontWeight: 500,
+                  }}
+                >
+                  {project.year}
+                </span>
                 <div
                   style={{
                     width: 32,
@@ -198,13 +215,28 @@ function ProjectRow({ project, index }) {
                     flexShrink: 0,
                   }}
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
                     <path d="M7 17L17 7M17 7H7M17 7v10" />
                   </svg>
                 </div>
               </div>
             </div>
-            <p style={{ fontSize: "0.875rem", color: "#4b5563", lineHeight: 1.8, marginBottom: "16px", maxWidth: "600px" }}>
+            <p
+              style={{
+                fontSize: "0.875rem",
+                color: "#4b5563",
+                lineHeight: 1.8,
+                marginBottom: "16px",
+                maxWidth: "600px",
+              }}
+            >
               {project.desc}
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
@@ -237,7 +269,16 @@ function SkillGroup({ label, items, index }) {
 
   return (
     <div ref={ref} style={style}>
-      <p style={{ fontSize: "0.72rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", color: "#111", marginBottom: 16 }}>
+      <p
+        style={{
+          fontSize: "0.72rem",
+          fontWeight: 700,
+          textTransform: "uppercase",
+          letterSpacing: "0.1em",
+          color: "#111",
+          marginBottom: 16,
+        }}
+      >
         {label}
       </p>
       <div style={{ display: "grid", gap: 10 }}>
@@ -331,7 +372,9 @@ export default function App() {
           zIndex: 100,
           background: scrolled ? "rgba(255,255,255,0.92)" : "transparent",
           backdropFilter: scrolled ? "blur(16px)" : "none",
-          borderBottom: scrolled ? "1px solid #f3f4f6" : "1px solid transparent",
+          borderBottom: scrolled
+            ? "1px solid #f3f4f6"
+            : "1px solid transparent",
           transition: "all 0.3s ease",
         }}
       >
@@ -346,15 +389,33 @@ export default function App() {
             justifyContent: "space-between",
           }}
         >
-          <a href="#" style={{ fontWeight: 700, fontSize: "1.05rem", letterSpacing: "-0.02em", color: "#111" }}>
+          <a
+            href="#"
+            style={{
+              fontWeight: 700,
+              fontSize: "1.05rem",
+              letterSpacing: "-0.02em",
+              color: "#111",
+            }}
+          >
             Saugat Adhikari
           </a>
           <nav style={{ display: "flex", gap: "28px", alignItems: "center" }}>
-            {[["About", "#about"], ["Work", "#work"], ["Skills", "#skills"], ["Contact", "#contact"]].map(([label, href]) => (
+            {[
+              ["About", "#about"],
+              ["Work", "#work"],
+              ["Skills", "#skills"],
+              ["Contact", "#contact"],
+            ].map(([label, href]) => (
               <a
                 key={label}
                 href={href}
-                style={{ fontSize: "0.92rem", fontWeight: 500, color: "#6b7280", transition: "color 0.15s" }}
+                style={{
+                  fontSize: "0.92rem",
+                  fontWeight: 500,
+                  color: "#6b7280",
+                  transition: "color 0.15s",
+                }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
               >
@@ -378,7 +439,15 @@ export default function App() {
           }}
         >
           <div ref={heroRef} style={heroStyle}>
-            <div className="hero-layout" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 360px", alignItems: "center", gap: 48 }}>
+            <div
+              className="hero-layout"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1fr) 360px",
+                alignItems: "center",
+                gap: 48,
+              }}
+            >
               <div>
                 <div
                   style={{
@@ -395,35 +464,105 @@ export default function App() {
                     borderRadius: 100,
                   }}
                 >
-                  <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#22c55e" }} />
+                  <span
+                    style={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      background: "#22c55e",
+                    }}
+                  />
                   Available for opportunities
                 </div>
-                <h1 className="hero-name" style={{ fontSize: "clamp(3rem, 7vw, 5.5rem)", fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 1.05, color: "#111", marginBottom: 28 }}>
+                <h1
+                  className="hero-name"
+                  style={{
+                    fontSize: "clamp(3rem, 7vw, 5.5rem)",
+                    fontWeight: 700,
+                    letterSpacing: "-0.04em",
+                    lineHeight: 1.05,
+                    color: "#111",
+                    marginBottom: 28,
+                  }}
+                >
                   Full-stack
                   <br />
                   <span style={{ color: "#9ca3af" }}>developer.</span>
                 </h1>
-                <p style={{ fontSize: "1.05rem", color: "#4b5563", lineHeight: 1.75, maxWidth: 520, marginBottom: 40 }}>
-                  I&apos;m <strong style={{ color: "#111", fontWeight: 600 }}>Saugat Adhikari</strong>, a developer based in Monroe, Louisiana. I build clean, purposeful software - from mobile platforms to developer tools.
+                <p
+                  style={{
+                    fontSize: "1.05rem",
+                    color: "#4b5563",
+                    lineHeight: 1.75,
+                    maxWidth: 520,
+                    marginBottom: 40,
+                  }}
+                >
+                  I&apos;m{" "}
+                  <strong style={{ color: "#111", fontWeight: 600 }}>
+                    Saugat Adhikari
+                  </strong>
+                  , a developer based in Monroe, Louisiana. I build clean,
+                  purposeful software - from mobile platforms to developer
+                  tools.
                 </p>
-                <div className="hero-cta" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                <div
+                  className="hero-cta"
+                  style={{ display: "flex", gap: 12, flexWrap: "wrap" }}
+                >
                   <a
                     href="#work"
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#111", color: "#fff", padding: "13px 26px", borderRadius: 10, fontSize: "0.875rem", fontWeight: 600, transition: "opacity 0.15s" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.82")}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      background: "#111",
+                      color: "#fff",
+                      padding: "13px 26px",
+                      borderRadius: 10,
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      transition: "opacity 0.15s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.opacity = "0.82")
+                    }
                     onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
                   >
                     See my work
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
                       <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                   </a>
                   <a
                     href={resumePdf}
                     download
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#fff", color: "#374151", padding: "13px 26px", borderRadius: 10, fontSize: "0.875rem", fontWeight: 600, border: "1px solid #e5e7eb", transition: "border-color 0.15s" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#9ca3af")}
-                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#e5e7eb")}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      background: "#fff",
+                      color: "#374151",
+                      padding: "13px 26px",
+                      borderRadius: 10,
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      border: "1px solid #e5e7eb",
+                      transition: "border-color 0.15s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.borderColor = "#9ca3af")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.borderColor = "#e5e7eb")
+                    }
                   >
                     Download Resume
                   </a>
@@ -431,15 +570,34 @@ export default function App() {
                     href={LINKS.github}
                     target="_blank"
                     rel="noreferrer"
-                    style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#fff", color: "#374151", padding: "13px 26px", borderRadius: 10, fontSize: "0.875rem", fontWeight: 600, border: "1px solid #e5e7eb", transition: "border-color 0.15s" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#9ca3af")}
-                    onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#e5e7eb")}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                      background: "#fff",
+                      color: "#374151",
+                      padding: "13px 26px",
+                      borderRadius: 10,
+                      fontSize: "0.875rem",
+                      fontWeight: 600,
+                      border: "1px solid #e5e7eb",
+                      transition: "border-color 0.15s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.borderColor = "#9ca3af")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.borderColor = "#e5e7eb")
+                    }
                   >
                     GitHub
                   </a>
                 </div>
               </div>
-              <div className="hero-image-wrap" style={{ display: "flex", justifyContent: "flex-end" }}>
+              <div
+                className="hero-image-wrap"
+                style={{ display: "flex", justifyContent: "flex-end" }}
+              >
                 <img
                   className="hero-image"
                   src={profileImage}
@@ -459,33 +617,97 @@ export default function App() {
           </div>
         </section>
 
-        <section id="about" style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}>
-          <p ref={aboutRef} style={{ ...aboutStyle, fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9ca3af", marginBottom: 40 }}>
+        <section
+          id="about"
+          style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}
+        >
+          <p
+            ref={aboutRef}
+            style={{
+              ...aboutStyle,
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "#9ca3af",
+              marginBottom: 40,
+            }}
+          >
             About
           </p>
-          <div ref={aboutRef2} style={{ ...aboutStyle2, display: "grid", gridTemplateColumns: "1fr 1.4fr", gap: 56 }} className="about-grid">
+          <div
+            ref={aboutRef2}
+            style={{
+              ...aboutStyle2,
+              display: "grid",
+              gridTemplateColumns: "1fr 1.4fr",
+              gap: 56,
+            }}
+            className="about-grid"
+          >
             <div>
-              <h2 style={{ fontSize: "clamp(1.6rem, 3vw, 2.2rem)", fontWeight: 700, letterSpacing: "-0.03em", lineHeight: 1.2, color: "#111" }}>
+              <h2
+                style={{
+                  fontSize: "clamp(1.6rem, 3vw, 2.2rem)",
+                  fontWeight: 700,
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1.2,
+                  color: "#111",
+                }}
+              >
                 I build things that solve real problems.
               </h2>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-              <p style={{ fontSize: "0.925rem", color: "#4b5563", lineHeight: 1.85 }}>
-                I&apos;m a full-stack developer who enjoys the entire process - from sketching a system design to shipping a polished user interface. I care about writing code that is readable, maintainable, and genuinely useful.
+              <p
+                style={{
+                  fontSize: "0.925rem",
+                  color: "#4b5563",
+                  lineHeight: 1.85,
+                }}
+              >
+                I&apos;m a full-stack developer who enjoys the entire process -
+                from sketching a system design to shipping a polished user
+                interface. I care about writing code that is readable,
+                maintainable, and genuinely useful.
               </p>
-              <p style={{ fontSize: "0.925rem", color: "#4b5563", lineHeight: 1.85 }}>
-                My work spans developer tooling, web apps, mobile platforms, and APIs. I&apos;m comfortable across the stack - equally at home in a Go backend as in a React frontend.
+              <p
+                style={{
+                  fontSize: "0.925rem",
+                  color: "#4b5563",
+                  lineHeight: 1.85,
+                }}
+              >
+                My work spans developer tooling, web apps, mobile platforms, and
+                APIs. I&apos;m comfortable across the stack - equally at home in
+                a Go backend as in a React frontend.
               </p>
               <div style={{ display: "flex", gap: 20, paddingTop: 8 }}>
-                {[["LinkedIn", LINKS.linkedin], ["GitHub", LINKS.github], ["Instagram", LINKS.instagram]].map(([label, href]) => (
+                {[
+                  ["LinkedIn", LINKS.linkedin],
+                  ["GitHub", LINKS.github],
+                  ["Instagram", LINKS.instagram],
+                ].map(([label, href]) => (
                   <a
                     key={label}
                     href={href}
                     target="_blank"
                     rel="noreferrer"
-                    style={{ fontSize: "0.83rem", fontWeight: 600, color: "#111", textDecoration: "underline", textUnderlineOffset: 3, textDecorationColor: "#e5e7eb", transition: "text-decoration-color 0.15s" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.textDecorationColor = "#111")}
-                    onMouseLeave={(e) => (e.currentTarget.style.textDecorationColor = "#e5e7eb")}
+                    style={{
+                      fontSize: "0.83rem",
+                      fontWeight: 600,
+                      color: "#111",
+                      textDecoration: "underline",
+                      textUnderlineOffset: 3,
+                      textDecorationColor: "#e5e7eb",
+                      transition: "text-decoration-color 0.15s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.textDecorationColor = "#111")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.textDecorationColor = "#e5e7eb")
+                    }
                   >
                     {label}
                   </a>
@@ -495,19 +717,58 @@ export default function App() {
           </div>
         </section>
 
-        <section id="work" style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}>
-          <div ref={workRef} style={{ ...workStyle, display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8, flexWrap: "wrap", gap: 8 }}>
-            <p style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9ca3af" }}>Selected Work</p>
+        <section
+          id="work"
+          style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}
+        >
+          <div
+            ref={workRef}
+            style={{
+              ...workStyle,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              marginBottom: 8,
+              flexWrap: "wrap",
+              gap: 8,
+            }}
+          >
+            <p
+              style={{
+                fontSize: "0.72rem",
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "#9ca3af",
+              }}
+            >
+              Selected Work
+            </p>
             <a
               href={LINKS.github}
               target="_blank"
               rel="noreferrer"
-              style={{ fontSize: "0.78rem", fontWeight: 500, color: "#9ca3af", display: "flex", alignItems: "center", gap: 5, transition: "color 0.15s" }}
+              style={{
+                fontSize: "0.78rem",
+                fontWeight: 500,
+                color: "#9ca3af",
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                transition: "color 0.15s",
+              }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
             >
               All repos on GitHub
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+              >
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </a>
@@ -519,27 +780,82 @@ export default function App() {
           </div>
         </section>
 
-        <section id="skills" style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}>
-          <p ref={skillRef} style={{ ...skillStyle, fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9ca3af", marginBottom: 48 }}>
+        <section
+          id="skills"
+          style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}
+        >
+          <p
+            ref={skillRef}
+            style={{
+              ...skillStyle,
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "#9ca3af",
+              marginBottom: 48,
+            }}
+          >
             Skills
           </p>
-          <div className="skills-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "40px 32px" }}>
+          <div
+            className="skills-grid"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: "40px 32px",
+            }}
+          >
             {SKILLS.map((group, index) => (
-              <SkillGroup key={group.label} label={group.label} items={group.items} index={index} />
+              <SkillGroup
+                key={group.label}
+                label={group.label}
+                items={group.items}
+                index={index}
+              />
             ))}
           </div>
         </section>
 
         <section id="contact" style={{ padding: "100px 0" }}>
           <div ref={ctaRef} style={ctaStyle}>
-            <p style={{ fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "#9ca3af", marginBottom: 24 }}>Contact</p>
-            <h2 style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 700, letterSpacing: "-0.04em", lineHeight: 1.1, color: "#111", marginBottom: 20 }}>
+            <p
+              style={{
+                fontSize: "0.72rem",
+                fontWeight: 600,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                color: "#9ca3af",
+                marginBottom: 24,
+              }}
+            >
+              Contact
+            </p>
+            <h2
+              style={{
+                fontSize: "clamp(2rem, 5vw, 3.5rem)",
+                fontWeight: 700,
+                letterSpacing: "-0.04em",
+                lineHeight: 1.1,
+                color: "#111",
+                marginBottom: 20,
+              }}
+            >
               Let&apos;s build
               <br />
               <span style={{ color: "#9ca3af" }}>something great.</span>
             </h2>
-            <p style={{ fontSize: "0.95rem", color: "#6b7280", lineHeight: 1.75, maxWidth: 420, marginBottom: 40 }}>
-              Open to freelance work, full-time roles, and interesting collaborations. Drop me a message - I usually reply quickly.
+            <p
+              style={{
+                fontSize: "0.95rem",
+                color: "#6b7280",
+                lineHeight: 1.75,
+                maxWidth: 420,
+                marginBottom: 40,
+              }}
+            >
+              Open to freelance work, full-time roles, and interesting
+              collaborations. Drop me a message - I usually reply quickly.
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
               {[
@@ -587,16 +903,39 @@ export default function App() {
       </main>
 
       <footer style={{ borderTop: "1px solid #f3f4f6" }}>
-        <div style={{ maxWidth: 960, margin: "0 auto", padding: "28px 32px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-          <span style={{ fontSize: "0.78rem", color: "#d1d5db", fontWeight: 500 }}>© 2026 Saugat Adhikari - Monroe, Louisiana</span>
+        <div
+          style={{
+            maxWidth: 960,
+            margin: "0 auto",
+            padding: "28px 32px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 8,
+          }}
+        >
+          <span
+            style={{ fontSize: "0.78rem", color: "#d1d5db", fontWeight: 500 }}
+          >
+            © 2026 Saugat Adhikari - Monroe, Louisiana
+          </span>
           <div style={{ display: "flex", gap: 20 }}>
-            {[["GitHub", LINKS.github], ["LinkedIn", LINKS.linkedin], ["Instagram", LINKS.instagram]].map(([label, href]) => (
+            {[
+              ["GitHub", LINKS.github],
+              ["LinkedIn", LINKS.linkedin],
+              ["Instagram", LINKS.instagram],
+            ].map(([label, href]) => (
               <a
                 key={label}
                 href={href}
                 target="_blank"
                 rel="noreferrer"
-                style={{ fontSize: "0.78rem", color: "#9ca3af", transition: "color 0.15s" }}
+                style={{
+                  fontSize: "0.78rem",
+                  color: "#9ca3af",
+                  transition: "color 0.15s",
+                }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
               >
