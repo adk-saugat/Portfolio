@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import profileImage from "./assets/profile.jpeg";
 import resumePdf from "./assets/SaugatAdhikariResumeV2.pdf";
-import { Analytics } from "@vercel/analytics/next";
+import { Analytics } from "@vercel/analytics/react";
 
 const LINKS = {
   github: "https://github.com/adk-saugat",
