@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
-
-const resumePdf = `${import.meta.env.BASE_URL}SaugatAdhikariResumeV2.pdf`;
-const profileImage = `${import.meta.env.BASE_URL}profile.jpeg`;
+import profileImage from "./assets/profile.jpeg";
+import resumePdf from "./assets/SaugatAdhikariResumeV2.pdf";
 
 const LINKS = {
   github: "https://github.com/adk-saugat",
