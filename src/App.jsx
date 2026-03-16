@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import "./App.css";
 
-const resumePdf = "/SaugatAdhikariResumeV2.pdf";
-const profileImage = "/Profile.JPEG";
+const resumePdf = `${import.meta.env.BASE_URL}/SaugatAdhikariResumeV2.pdf`;
+const profileImage = `${import.meta.env.BASE_URL}/profile.jpeg`;
 
 const LINKS = {
   github: "https://github.com/adk-saugat",
@@ -9,7 +10,7 @@ const LINKS = {
   instagram: "https://instagram.com/adhikari_saugat_",
 };
 
-const PROJECTS = [
+const FALLBACK_PROJECTS = [
   {
     num: "01",
     name: "GharFix",
@@ -47,6 +48,36 @@ const PROJECTS = [
     year: "2023",
   },
 ];
+
+const GITHUB_USERNAME = "adk-saugat";
+const MAX_DISPLAY_PROJECTS = 6;
+const PINNED_REPO_NAMES = ["GharFix", "Stash", "Mini-LMS", "Gradual"];
+const PINNED_REPO_NAME_SET = new Set(
+  PINNED_REPO_NAMES.map((repoName) => repoName.toLowerCase()),
+);
+
+function mapReposToProjects(repos) {
+  return repos.slice(0, MAX_DISPLAY_PROJECTS).map((repo, index) => {
+    const stack = [repo.language, ...(repo.topics ?? []).slice(0, 3)].filter(
+      Boolean,
+    );
+    const description =
+      repo.description ?? "Open-source project built and maintained on GitHub.";
+
+    return {
+      num: String(index + 1).padStart(2, "0"),
+      name: repo.name,
+      tagline:
+        description.length > 58
+          ? `${description.slice(0, 58)}...`
+          : description,
+      desc: description,
+      stack: stack.length > 0 ? stack : ["GitHub"],
+      url: repo.html_url,
+      year: String(new Date(repo.updated_at).getFullYear()),
+    };
+  });
+}
 
 const SKILLS = [
   {
@@ -126,6 +157,7 @@ function ProjectRow({ project, index }) {
   return (
     <div ref={ref} style={style}>
       <a
+        className="project-row"
         href={project.url}
         target="_blank"
         rel="noreferrer"
@@ -139,8 +171,12 @@ function ProjectRow({ project, index }) {
           borderBottom: "1px solid #f3f4f6",
         }}
       >
-        <div style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}>
+        <div
+          className="project-row-inner"
+          style={{ display: "flex", gap: "24px", alignItems: "flex-start" }}
+        >
           <span
+            className="project-number"
             style={{
               fontSize: "0.7rem",
               color: "#d1d5db",
@@ -177,16 +213,6 @@ function ProjectRow({ project, index }) {
                 >
                   {project.name}
                 </h3>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "#9ca3af",
-                    margin: "4px 0 0",
-                    fontStyle: "italic",
-                  }}
-                >
-                  {project.tagline}
-                </p>
               </div>
               <div
                 style={{ display: "flex", alignItems: "center", gap: "8px" }}
@@ -327,11 +353,53 @@ function SkillGroup({ label, items, index }) {
 
 export default function App() {
   const [scrolled, setScrolled] = useState(false);
+  const [projects, setProjects] = useState(FALLBACK_PROJECTS);
+  const [repoCount, setRepoCount] = useState(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadGithubProjects() {
+      try {
+        const response = await fetch(
+          `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`,
+          {
+            headers: {
+              Accept: "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
+            },
+            signal: controller.signal,
+          },
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const repos = await response.json();
+        const publicRepos = repos.filter((repo) => !repo.fork);
+        const pinnedRepos = publicRepos.filter((repo) =>
+          PINNED_REPO_NAME_SET.has(repo.name.toLowerCase()),
+        );
+        setRepoCount(pinnedRepos.length);
+
+        const mappedProjects = mapReposToProjects(pinnedRepos);
+        if (mappedProjects.length > 0) {
+          setProjects(mappedProjects);
+        }
+      } catch {
+        // Keep fallback projects if GitHub API is unavailable.
+      }
+    }
+
+    loadGithubProjects();
+    return () => controller.abort();
   }, []);
 
   const [heroRef, heroStyle] = useFade(0, "0px");
@@ -343,26 +411,6 @@ export default function App() {
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; font-size: 17px; }
-        body { background: #fff; font-family: 'Inter', system-ui, sans-serif; color: #111; -webkit-font-smoothing: antialiased; }
-        a { text-decoration: none; color: inherit; }
-        ::selection { background: #111; color: #fff; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 4px; }
-        @media (max-width: 640px) {
-          .hero-name { font-size: 2.8rem !important; }
-          .about-grid { grid-template-columns: 1fr !important; }
-          .skills-grid { grid-template-columns: 1fr 1fr !important; }
-          .hero-cta { flex-direction: column !important; }
-          .hero-layout { grid-template-columns: 1fr !important; gap: 24px !important; }
-          .hero-image-wrap { justify-content: flex-start !important; }
-          .hero-image { width: 220px !important; height: 220px !important; }
-        }
-      `}</style>
-
       <header
         style={{
           position: "fixed",
@@ -379,6 +427,7 @@ export default function App() {
         }}
       >
         <div
+          className="header-shell"
           style={{
             maxWidth: 960,
             margin: "0 auto",
@@ -390,6 +439,7 @@ export default function App() {
           }}
         >
           <a
+            className="brand-name"
             href="#"
             style={{
               fontWeight: 700,
@@ -400,7 +450,10 @@ export default function App() {
           >
             Saugat Adhikari
           </a>
-          <nav style={{ display: "flex", gap: "28px", alignItems: "center" }}>
+          <nav
+            className="top-nav"
+            style={{ display: "flex", gap: "28px", alignItems: "center" }}
+          >
             {[
               ["About", "#about"],
               ["Work", "#work"],
@@ -426,8 +479,12 @@ export default function App() {
         </div>
       </header>
 
-      <main style={{ maxWidth: 960, margin: "0 auto", padding: "0 32px" }}>
+      <main
+        className="page-shell"
+        style={{ maxWidth: 960, margin: "0 auto", padding: "0 32px" }}
+      >
         <section
+          className="hero-section"
           style={{
             minHeight: "92vh",
             display: "flex",
@@ -477,7 +534,7 @@ export default function App() {
                 <h1
                   className="hero-name"
                   style={{
-                    fontSize: "clamp(3rem, 7vw, 5.5rem)",
+                    fontSize: "clamp(3.6rem, 8vw, 6.4rem)",
                     fontWeight: 700,
                     letterSpacing: "-0.04em",
                     lineHeight: 1.05,
@@ -489,6 +546,22 @@ export default function App() {
                   <br />
                   <span style={{ color: "#9ca3af" }}>developer.</span>
                 </h1>
+                <div className="hero-inline-image-wrap">
+                  <img
+                    className="hero-image"
+                    src={profileImage}
+                    alt="Saugat Adhikari"
+                    style={{
+                      width: 260,
+                      height: 260,
+                      borderRadius: "50%",
+                      objectFit: "contain",
+                      background: "#f9fafb",
+                      border: "3px solid #e5e7eb",
+                      boxShadow: "0 12px 36px rgba(17, 24, 39, 0.08)",
+                    }}
+                  />
+                </div>
                 <p
                   style={{
                     fontSize: "1.05rem",
@@ -619,6 +692,7 @@ export default function App() {
 
         <section
           id="about"
+          className="section-block"
           style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}
         >
           <p
@@ -682,7 +756,10 @@ export default function App() {
                 APIs. I&apos;m comfortable across the stack - equally at home in
                 a Go backend as in a React frontend.
               </p>
-              <div style={{ display: "flex", gap: 20, paddingTop: 8 }}>
+              <div
+                className="about-links"
+                style={{ display: "flex", gap: 20, paddingTop: 8 }}
+              >
                 {[
                   ["LinkedIn", LINKS.linkedin],
                   ["GitHub", LINKS.github],
@@ -719,9 +796,11 @@ export default function App() {
 
         <section
           id="work"
+          className="section-block"
           style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}
         >
           <div
+            className="work-head"
             ref={workRef}
             style={{
               ...workStyle,
@@ -760,7 +839,7 @@ export default function App() {
               onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
             >
-              All repos on GitHub
+              {`Pinned projects on GitHub${repoCount ? ` (${repoCount})` : ""}`}
               <svg
                 width="12"
                 height="12"
@@ -774,7 +853,7 @@ export default function App() {
             </a>
           </div>
           <div style={{ borderTop: "1px solid #f3f4f6" }}>
-            {PROJECTS.map((project, i) => (
+            {projects.map((project, i) => (
               <ProjectRow key={project.name} project={project} index={i} />
             ))}
           </div>
@@ -782,6 +861,7 @@ export default function App() {
 
         <section
           id="skills"
+          className="section-block"
           style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}
         >
           <p
@@ -817,7 +897,11 @@ export default function App() {
           </div>
         </section>
 
-        <section id="contact" style={{ padding: "100px 0" }}>
+        <section
+          id="contact"
+          className="section-block"
+          style={{ padding: "100px 0" }}
+        >
           <div ref={ctaRef} style={ctaStyle}>
             <p
               style={{
@@ -857,7 +941,10 @@ export default function App() {
               Open to freelance work, full-time roles, and interesting
               collaborations. Drop me a message - I usually reply quickly.
             </p>
-            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <div
+              className="contact-actions"
+              style={{ display: "flex", gap: 12, flexWrap: "wrap" }}
+            >
               {[
                 { label: "LinkedIn", href: LINKS.linkedin, primary: true },
                 { label: "GitHub", href: LINKS.github, primary: false },
@@ -904,6 +991,7 @@ export default function App() {
 
       <footer style={{ borderTop: "1px solid #f3f4f6" }}>
         <div
+          className="footer-shell"
           style={{
             maxWidth: 960,
             margin: "0 auto",
@@ -920,7 +1008,7 @@ export default function App() {
           >
             © 2026 Saugat Adhikari - Monroe, Louisiana
           </span>
-          <div style={{ display: "flex", gap: 20 }}>
+          <div className="footer-links" style={{ display: "flex", gap: 20 }}>
             {[
               ["GitHub", LINKS.github],
               ["LinkedIn", LINKS.linkedin],
