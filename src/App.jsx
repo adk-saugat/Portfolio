@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import profileImage from "./assets/profile.jpeg";
 import resumePdf from "./assets/SaugatAdhikariResumeV2.pdf";
+import { Analytics } from "@vercel/analytics/next";
 
 const LINKS = {
   github: "https://github.com/adk-saugat",
@@ -410,6 +411,7 @@ export default function App() {
 
   return (
     <>
+      <Analytics />
       <header
         style={{
           position: "fixed",
