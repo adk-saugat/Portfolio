@@ -65,9 +65,9 @@ export default async function handler(req, res) {
   }
 
   const adminCode = process.env.ADMIN_CODE;
-  if (!adminCode || !process.env.BLOB_READ_WRITE_TOKEN) {
+  if (!adminCode) {
     res.status(500).json({
-      error: "Resume upload is not configured on Vercel yet.",
+      error: "ADMIN_CODE is not available to this deployment. Add it in Vercel, then redeploy.",
     });
     return;
   }
@@ -100,12 +100,24 @@ export default async function handler(req, res) {
     return;
   }
 
-  await put(RESUME_PATH, bytes, {
-    access: "public",
-    contentType: "application/pdf",
-    addRandomSuffix: false,
-    allowOverwrite: true,
-  });
+  try {
+    await put(RESUME_PATH, bytes, {
+      access: "public",
+      contentType: "application/pdf",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message.includes("No blob credentials") || message.includes("No read-write token")) {
+      res.status(500).json({
+        error: "The Blob store is not connected to this deployment. Connect it in Vercel, then redeploy.",
+      });
+      return;
+    }
+    res.status(500).json({ error: "The PDF could not be saved." });
+    return;
+  }
 
   res.status(200).json({ ok: true });
 }
