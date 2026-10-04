@@ -1,8 +1,9 @@
 import { timingSafeEqual } from "node:crypto";
-import { head, put } from "@vercel/blob";
+import { get, put } from "@vercel/blob";
 
 const RESUME_PATH = "resume/SaugatAdhikariResume.pdf";
 const MAX_PDF_BYTES = 3 * 1024 * 1024;
+const STORE_ACCESS = ["private", "public"];
 
 export const config = {
   api: {
@@ -22,18 +23,45 @@ function codesMatch(input, secret) {
   return timingSafeEqual(given, expected);
 }
 
-async function findResume() {
-  try {
-    return await head(RESUME_PATH);
-  } catch {
-    return null;
+function blobMessage(error) {
+  const message = error instanceof Error ? error.message : "";
+  return message.replace(/^Vercel Blob:\s*/, "");
+}
+
+async function readResume() {
+  for (const access of STORE_ACCESS) {
+    try {
+      const result = await get(RESUME_PATH, { access, useCache: false });
+      if (result?.statusCode === 200 && result.stream) return result;
+    } catch {
+      // A private store rejects a public read, and the reverse is also true.
+    }
   }
+  return null;
+}
+
+async function saveResume(bytes) {
+  let lastError;
+  for (const access of STORE_ACCESS) {
+    try {
+      await put(RESUME_PATH, bytes, {
+        access,
+        contentType: "application/pdf",
+        addRandomSuffix: false,
+        allowOverwrite: true,
+      });
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
 }
 
 export default async function handler(req, res) {
   if (req.method === "GET" || req.method === "HEAD") {
-    const blob = await findResume();
-    if (!blob) {
+    const file = await readResume();
+    if (!file) {
       res.status(404).end();
       return;
     }
@@ -42,12 +70,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    const file = await fetch(blob.url);
-    if (!file.ok) {
-      res.status(404).end();
-      return;
-    }
-    const bytes = Buffer.from(await file.arrayBuffer());
+    const bytes = Buffer.from(await new Response(file.stream).arrayBuffer());
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
@@ -101,21 +124,18 @@ export default async function handler(req, res) {
   }
 
   try {
-    await put(RESUME_PATH, bytes, {
-      access: "public",
-      contentType: "application/pdf",
-      addRandomSuffix: false,
-      allowOverwrite: true,
-    });
+    await saveResume(bytes);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "";
+    const message = blobMessage(error);
     if (message.includes("No blob credentials") || message.includes("No read-write token")) {
       res.status(500).json({
         error: "The Blob store is not connected to this deployment. Connect it in Vercel, then redeploy.",
       });
       return;
     }
-    res.status(500).json({ error: "The PDF could not be saved." });
+    res.status(500).json({
+      error: message || "The PDF could not be saved.",
+    });
     return;
   }
 
