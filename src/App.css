@@ -11,12 +11,45 @@
 html {
   scroll-behavior: smooth;
   font-size: 17px;
+  color-scheme: light;
+  background: var(--bg);
+}
+
+:root {
+  --bg: #ffffff;
+  --text: #111111;
+  --muted: #9ca3af;
+  --muted-2: #6b7280;
+  --body: #4b5563;
+  --faint: #d1d5db;
+  --line: #e5e7eb;
+  --surface: #f9fafb;
+  --header: rgba(255, 255, 255, 0.92);
+  --primary-bg: #111111;
+  --primary-text: #ffffff;
+  --secondary-text: #374151;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101114;
+  --text: #f3f3f4;
+  --muted: #a7a7b1;
+  --muted-2: #9696a1;
+  --body: #c8c8d1;
+  --faint: #8a8b96;
+  --line: #2a2b32;
+  --surface: #191a20;
+  --header: rgba(16, 17, 20, 0.88);
+  --primary-bg: #f3f3f4;
+  --primary-text: #121316;
+  --secondary-text: #e6e6eb;
 }
 
 body {
-  background: #fff;
+  background: var(--bg);
   font-family: "Inter", system-ui, sans-serif;
-  color: #111;
+  color: var(--text);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -26,8 +59,8 @@ a {
 }
 
 ::selection {
-  background: #111;
-  color: #fff;
+  background: var(--text);
+  color: var(--bg);
 }
 
 ::-webkit-scrollbar {
@@ -35,8 +68,135 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
+  background: var(--faint);
   border-radius: 4px;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.theme-toggle:hover {
+  border-color: var(--muted);
+}
+
+.admin-button {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-size: 0.78rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.admin-button:hover {
+  color: var(--text);
+}
+
+.admin-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(17, 17, 17, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.admin-panel {
+  width: min(100%, 420px);
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  display: grid;
+  gap: 14px;
+}
+
+.admin-panel h2 {
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
+}
+
+.admin-panel p {
+  font-size: 0.84rem;
+  color: var(--body);
+  line-height: 1.6;
+}
+
+.admin-panel label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted-2);
+}
+
+.admin-panel input {
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.admin-actions button {
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+.admin-actions button[type="button"] {
+  background: transparent;
+  color: var(--secondary-text);
+  border: 1px solid var(--line);
+}
+
+.admin-actions button[type="submit"] {
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  border: 1px solid var(--primary-bg);
+}
+
+.admin-actions button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.admin-status {
+  font-size: 0.82rem;
+  color: var(--body);
 }
 
 .hero-inline-image-wrap {
@@ -197,7 +357,9 @@ a {
   }
 
   .header-shell {
+    flex-direction: row !important;
     align-items: center !important;
+    justify-content: space-between !important;
   }
 
   .brand-name {

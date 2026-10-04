@@ -171,7 +171,7 @@ function ProjectRow({ project, index }) {
           padding: "40px 0",
           textDecoration: "none",
           color: "inherit",
-          borderBottom: "1px solid #f3f4f6",
+          borderBottom: "1px solid var(--line)",
           cursor: linked ? "pointer" : "default",
         }}
       >
@@ -183,7 +183,7 @@ function ProjectRow({ project, index }) {
             className="project-number"
             style={{
               fontSize: "0.7rem",
-              color: "#d1d5db",
+              color: "var(--faint)",
               fontWeight: 600,
               paddingTop: "6px",
               minWidth: "24px",
@@ -210,7 +210,7 @@ function ProjectRow({ project, index }) {
                     fontSize: "1.35rem",
                     fontWeight: 700,
                     letterSpacing: "-0.025em",
-                    color: "#111",
+                    color: "var(--text)",
                     margin: 0,
                     lineHeight: 1.2,
                   }}
@@ -223,7 +223,7 @@ function ProjectRow({ project, index }) {
                       margin: "6px 0 0",
                       fontSize: "0.78rem",
                       fontWeight: 500,
-                      color: "#9ca3af",
+                      color: "var(--muted)",
                     }}
                   >
                     {project.detail}
@@ -237,7 +237,7 @@ function ProjectRow({ project, index }) {
                   <span
                     style={{
                       fontSize: "0.72rem",
-                      color: "#d1d5db",
+                      color: "var(--faint)",
                       fontWeight: 500,
                     }}
                   >
@@ -250,13 +250,13 @@ function ProjectRow({ project, index }) {
                       width: 32,
                       height: 32,
                       borderRadius: "50%",
-                      border: `1px solid ${hovered ? "#111" : "#e5e7eb"}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      transition: "all 0.2s",
-                      background: hovered ? "#111" : "transparent",
-                      color: hovered ? "#fff" : "#9ca3af",
+                    border: `1px solid ${hovered ? "var(--text)" : "var(--line)"}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 0.2s",
+                    background: hovered ? "var(--text)" : "transparent",
+                    color: hovered ? "var(--bg)" : "var(--muted)",
                       flexShrink: 0,
                     }}
                   >
@@ -277,7 +277,7 @@ function ProjectRow({ project, index }) {
             <p
               style={{
                 fontSize: "0.875rem",
-                color: "#4b5563",
+                color: "var(--body)",
                 lineHeight: 1.8,
                 marginBottom: "16px",
                 maxWidth: "600px",
@@ -293,10 +293,10 @@ function ProjectRow({ project, index }) {
                     fontSize: "0.72rem",
                     fontWeight: 500,
                     padding: "3px 10px",
-                    background: "#f9fafb",
-                    border: "1px solid #e5e7eb",
+                    background: "var(--surface)",
+                    border: "1px solid var(--line)",
                     borderRadius: "6px",
-                    color: "#6b7280",
+                    color: "var(--muted-2)",
                   }}
                 >
                   {tech}
@@ -321,7 +321,7 @@ function SkillGroup({ label, items, index }) {
           fontWeight: 700,
           textTransform: "uppercase",
           letterSpacing: "0.1em",
-          color: "#111",
+          color: "var(--text)",
           marginBottom: 16,
         }}
       >
@@ -333,12 +333,12 @@ function SkillGroup({ label, items, index }) {
             key={item.name}
             style={{
               fontSize: "0.9rem",
-              color: "#4b5563",
+              color: "var(--body)",
               display: "flex",
               alignItems: "center",
               gap: 10,
-              border: "1px solid #e5e7eb",
-              background: "#fcfcfd",
+              border: "1px solid var(--line)",
+              background: "var(--surface)",
               borderRadius: 10,
               padding: "10px 12px",
             }}
@@ -371,14 +371,84 @@ function SkillGroup({ label, items, index }) {
   );
 }
 
+function fileToBase64(file) {
+  return file.arrayBuffer().then((buffer) => {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+    const size = 0x8000;
+    for (let index = 0; index < bytes.length; index += size) {
+      binary += String.fromCharCode(...bytes.subarray(index, index + size));
+    }
+    return btoa(binary);
+  });
+}
+
 export default function App() {
   const [scrolled, setScrolled] = useState(false);
+  const [theme, setTheme] = useState(() =>
+    document.documentElement.dataset.theme === "dark" ? "dark" : "light",
+  );
+  const [resumeHref, setResumeHref] = useState(resumePdf);
+  const [adminOpen, setAdminOpen] = useState(false);
+  const [adminCode, setAdminCode] = useState("");
+  const [adminFile, setAdminFile] = useState(null);
+  const [adminStatus, setAdminStatus] = useState("");
+  const [adminBusy, setAdminBusy] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme === "dark" ? "dark" : "";
+    localStorage.setItem("theme", theme);
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", theme === "dark" ? "#101114" : "#ffffff");
+  }, [theme]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch("/api/resume", { method: "HEAD", signal: controller.signal })
+      .then((response) => {
+        if (response.ok) setResumeHref("/api/resume");
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
+
+  async function uploadResume(event) {
+    event.preventDefault();
+    if (!adminFile) {
+      setAdminStatus("Choose a PDF to upload.");
+      return;
+    }
+    setAdminBusy(true);
+    setAdminStatus("");
+    try {
+      const pdf = await fileToBase64(adminFile);
+      const response = await fetch("/api/resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: adminCode, pdf }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setAdminStatus(body.error || "Upload failed.");
+        return;
+      }
+      setResumeHref(`/api/resume?v=${Date.now()}`);
+      setAdminCode("");
+      setAdminFile(null);
+      setAdminStatus("Resume updated. Download now serves this PDF.");
+    } catch {
+      setAdminStatus("Upload failed. Deploy this site on Vercel and try again.");
+    } finally {
+      setAdminBusy(false);
+    }
+  }
 
   const [heroRef, heroStyle] = useFade(0, "0px");
   const [aboutRef, aboutStyle] = useFade(0);
@@ -397,10 +467,10 @@ export default function App() {
           left: 0,
           right: 0,
           zIndex: 100,
-          background: scrolled ? "rgba(255,255,255,0.92)" : "transparent",
+          background: scrolled ? "var(--header)" : "transparent",
           backdropFilter: scrolled ? "blur(16px)" : "none",
           borderBottom: scrolled
-            ? "1px solid #f3f4f6"
+            ? "1px solid var(--line)"
             : "1px solid transparent",
           transition: "all 0.3s ease",
         }}
@@ -424,37 +494,82 @@ export default function App() {
               fontWeight: 700,
               fontSize: "1.05rem",
               letterSpacing: "-0.02em",
-              color: "#111",
+              color: "var(--text)",
             }}
           >
             Saugat Adhikari
           </a>
-          <nav
-            className="top-nav"
-            style={{ display: "flex", gap: "28px", alignItems: "center" }}
-          >
-            {[
-              ["About", "#about"],
-              ["Work", "#work"],
-              ["Skills", "#skills"],
-              ["Contact", "#contact"],
-            ].map(([label, href]) => (
-              <a
-                key={label}
-                href={href}
-                style={{
-                  fontSize: "0.92rem",
-                  fontWeight: 500,
-                  color: "#6b7280",
-                  transition: "color 0.15s",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#6b7280")}
-              >
-                {label}
-              </a>
-            ))}
-          </nav>
+          <div className="header-actions">
+            <nav
+              className="top-nav"
+              style={{ display: "flex", gap: "28px", alignItems: "center" }}
+            >
+              {[
+                ["About", "#about"],
+                ["Work", "#work"],
+                ["Skills", "#skills"],
+                ["Contact", "#contact"],
+              ].map(([label, href]) => (
+                <a
+                  key={label}
+                  href={href}
+                  style={{
+                    fontSize: "0.92rem",
+                    fontWeight: 500,
+                    color: "var(--muted-2)",
+                    transition: "color 0.15s",
+                  }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.color = "var(--text)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.color = "var(--muted-2)")
+                  }
+                >
+                  {label}
+                </a>
+              ))}
+            </nav>
+            <button
+              type="button"
+              className="theme-toggle"
+              aria-label={
+                theme === "dark"
+                  ? "Switch to light theme"
+                  : "Switch to dark theme"
+              }
+              onClick={() =>
+                setTheme((current) => (current === "dark" ? "light" : "dark"))
+              }
+            >
+              {theme === "dark" ? (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+                </svg>
+              ) : (
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden="true"
+                >
+                  <path d="M21 14.5A8.5 8.5 0 1 1 9.5 3 7 7 0 0 0 21 14.5z" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -471,7 +586,7 @@ export default function App() {
             justifyContent: "center",
             paddingTop: 80,
             paddingBottom: 60,
-            borderBottom: "1px solid #f3f4f6",
+            borderBottom: "1px solid var(--line)",
           }}
         >
           <div ref={heroRef} style={heroStyle}>
@@ -492,10 +607,10 @@ export default function App() {
                     gap: 8,
                     fontSize: "0.78rem",
                     fontWeight: 500,
-                    color: "#6b7280",
+                    color: "var(--muted-2)",
                     marginBottom: 32,
-                    background: "#f9fafb",
-                    border: "1px solid #e5e7eb",
+                    background: "var(--surface)",
+                    border: "1px solid var(--line)",
                     padding: "6px 14px",
                     borderRadius: 100,
                   }}
@@ -517,13 +632,13 @@ export default function App() {
                     fontWeight: 700,
                     letterSpacing: "-0.04em",
                     lineHeight: 1.05,
-                    color: "#111",
+                    color: "var(--text)",
                     marginBottom: 28,
                   }}
                 >
-                  Full-stack
+                  Backend
                   <br />
-                  <span style={{ color: "#9ca3af" }}>developer.</span>
+                  <span style={{ color: "var(--muted)" }}>developer.</span>
                 </h1>
                 <div className="hero-inline-image-wrap">
                   <img
@@ -535,28 +650,29 @@ export default function App() {
                       height: 260,
                       borderRadius: "50%",
                       objectFit: "contain",
-                      background: "#f9fafb",
-                      border: "3px solid #e5e7eb",
-                      boxShadow: "0 12px 36px rgba(17, 24, 39, 0.08)",
+                      background: "var(--surface)",
+                      border: "3px solid var(--line)",
+                      boxShadow: "0 12px 32px rgba(28, 27, 25, 0.08)",
                     }}
                   />
                 </div>
                 <p
                   style={{
                     fontSize: "1.05rem",
-                    color: "#4b5563",
+                    color: "var(--body)",
                     lineHeight: 1.75,
                     maxWidth: 520,
                     marginBottom: 40,
                   }}
                 >
                   I&apos;m{" "}
-                  <strong style={{ color: "#111", fontWeight: 600 }}>
+                  <strong style={{ color: "var(--text)", fontWeight: 600 }}>
                     Saugat Adhikari
                   </strong>
                   , a computer science student at the University of Louisiana
-                  Monroe. I build full-stack software in Go and React, from
-                  real-time services to the tools I use myself.
+                  Monroe. I build backend systems in Go, from real-time
+                  services to the tools I use myself, and reach for React when
+                  a product needs an interface.
                 </p>
                 <div
                   className="hero-cta"
@@ -568,8 +684,8 @@ export default function App() {
                       display: "inline-flex",
                       alignItems: "center",
                       gap: 8,
-                      background: "#111",
-                      color: "#fff",
+                      background: "var(--primary-bg)",
+                      color: "var(--primary-text)",
                       padding: "13px 26px",
                       borderRadius: 10,
                       fontSize: "0.875rem",
@@ -594,26 +710,26 @@ export default function App() {
                     </svg>
                   </a>
                   <a
-                    href={resumePdf}
+                    href={resumeHref}
                     download="SaugatAdhikariResume.pdf"
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
                       gap: 8,
-                      background: "#fff",
-                      color: "#374151",
+                      background: "transparent",
+                      color: "var(--secondary-text)",
                       padding: "13px 26px",
                       borderRadius: 10,
                       fontSize: "0.875rem",
                       fontWeight: 600,
-                      border: "1px solid #e5e7eb",
+                      border: "1px solid var(--line)",
                       transition: "border-color 0.15s",
                     }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.borderColor = "#9ca3af")
+                      (e.currentTarget.style.borderColor = "var(--muted)")
                     }
                     onMouseLeave={(e) =>
-                      (e.currentTarget.style.borderColor = "#e5e7eb")
+                      (e.currentTarget.style.borderColor = "var(--line)")
                     }
                   >
                     Download Resume
@@ -626,20 +742,20 @@ export default function App() {
                       display: "inline-flex",
                       alignItems: "center",
                       gap: 8,
-                      background: "#fff",
-                      color: "#374151",
+                      background: "transparent",
+                      color: "var(--secondary-text)",
                       padding: "13px 26px",
                       borderRadius: 10,
                       fontSize: "0.875rem",
                       fontWeight: 600,
-                      border: "1px solid #e5e7eb",
+                      border: "1px solid var(--line)",
                       transition: "border-color 0.15s",
                     }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.borderColor = "#9ca3af")
+                      (e.currentTarget.style.borderColor = "var(--muted)")
                     }
                     onMouseLeave={(e) =>
-                      (e.currentTarget.style.borderColor = "#e5e7eb")
+                      (e.currentTarget.style.borderColor = "var(--line)")
                     }
                   >
                     GitHub
@@ -659,9 +775,9 @@ export default function App() {
                     height: 340,
                     borderRadius: "50%",
                     objectFit: "contain",
-                    background: "#f9fafb",
-                    border: "3px solid #e5e7eb",
-                    boxShadow: "0 12px 36px rgba(17, 24, 39, 0.08)",
+                    background: "var(--surface)",
+                    border: "3px solid var(--line)",
+                    boxShadow: "0 12px 32px rgba(28, 27, 25, 0.08)",
                   }}
                 />
               </div>
@@ -672,7 +788,7 @@ export default function App() {
         <section
           id="about"
           className="section-block"
-          style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}
+          style={{ padding: "100px 0", borderBottom: "1px solid var(--line)" }}
         >
           <p
             ref={aboutRef}
@@ -682,7 +798,7 @@ export default function App() {
               fontWeight: 600,
               letterSpacing: "0.1em",
               textTransform: "uppercase",
-              color: "#9ca3af",
+              color: "var(--muted)",
               marginBottom: 40,
             }}
           >
@@ -705,7 +821,7 @@ export default function App() {
                   fontWeight: 700,
                   letterSpacing: "-0.03em",
                   lineHeight: 1.2,
-                  color: "#111",
+                  color: "var(--text)",
                 }}
               >
                 I build systems that have to hold up in real use.
@@ -715,7 +831,7 @@ export default function App() {
               <p
                 style={{
                   fontSize: "0.925rem",
-                  color: "#4b5563",
+                  color: "var(--body)",
                   lineHeight: 1.85,
                 }}
               >
@@ -727,7 +843,7 @@ export default function App() {
               <p
                 style={{
                   fontSize: "0.925rem",
-                  color: "#4b5563",
+                  color: "var(--body)",
                   lineHeight: 1.85,
                 }}
               >
@@ -753,10 +869,10 @@ export default function App() {
                   <div
                     key={label}
                     style={{
-                      border: "1px solid #e5e7eb",
+                      border: "1px solid var(--line)",
                       borderRadius: 10,
                       padding: "12px 14px",
-                      background: "#fcfcfd",
+                      background: "var(--surface)",
                     }}
                   >
                     <p
@@ -765,7 +881,7 @@ export default function App() {
                         fontWeight: 700,
                         letterSpacing: "0.08em",
                         textTransform: "uppercase",
-                        color: "#9ca3af",
+                        color: "var(--muted)",
                         marginBottom: 6,
                       }}
                     >
@@ -775,7 +891,7 @@ export default function App() {
                       style={{
                         fontSize: "0.84rem",
                         fontWeight: 600,
-                        color: "#111",
+                        color: "var(--text)",
                         lineHeight: 1.4,
                       }}
                     >
@@ -802,17 +918,17 @@ export default function App() {
                     style={{
                       fontSize: "0.83rem",
                       fontWeight: 600,
-                      color: "#111",
+                      color: "var(--text)",
                       textDecoration: "underline",
                       textUnderlineOffset: 3,
-                      textDecorationColor: "#e5e7eb",
+                      textDecorationColor: "var(--line)",
                       transition: "text-decoration-color 0.15s",
                     }}
                     onMouseEnter={(e) =>
-                      (e.currentTarget.style.textDecorationColor = "#111")
+                      (e.currentTarget.style.textDecorationColor = "var(--text)")
                     }
                     onMouseLeave={(e) =>
-                      (e.currentTarget.style.textDecorationColor = "#e5e7eb")
+                      (e.currentTarget.style.textDecorationColor = "var(--line)")
                     }
                   >
                     {label}
@@ -826,7 +942,7 @@ export default function App() {
         <section
           id="work"
           className="section-block"
-          style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}
+          style={{ padding: "100px 0", borderBottom: "1px solid var(--line)" }}
         >
           <div
             className="work-head"
@@ -847,7 +963,7 @@ export default function App() {
                 fontWeight: 600,
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
-                color: "#9ca3af",
+                color: "var(--muted)",
               }}
             >
               Selected Work
@@ -859,14 +975,14 @@ export default function App() {
               style={{
                 fontSize: "0.78rem",
                 fontWeight: 500,
-                color: "#9ca3af",
+                color: "var(--muted)",
                 display: "flex",
                 alignItems: "center",
                 gap: 5,
                 transition: "color 0.15s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text)")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
             >
               More on GitHub
               <svg
@@ -881,7 +997,7 @@ export default function App() {
               </svg>
             </a>
           </div>
-          <div style={{ borderTop: "1px solid #f3f4f6" }}>
+          <div style={{ borderTop: "1px solid var(--line)" }}>
             {PROJECTS.map((project, i) => (
               <ProjectRow key={project.name} project={project} index={i} />
             ))}
@@ -892,14 +1008,14 @@ export default function App() {
               fontWeight: 600,
               letterSpacing: "0.1em",
               textTransform: "uppercase",
-              color: "#9ca3af",
+              color: "var(--muted)",
               marginTop: 56,
               marginBottom: 8,
             }}
           >
             Hackathons
           </p>
-          <div style={{ borderTop: "1px solid #f3f4f6" }}>
+          <div style={{ borderTop: "1px solid var(--line)" }}>
             {HACKATHONS.map((project, i) => (
               <ProjectRow key={project.name} project={project} index={i} />
             ))}
@@ -909,7 +1025,7 @@ export default function App() {
         <section
           id="skills"
           className="section-block"
-          style={{ padding: "100px 0", borderBottom: "1px solid #f3f4f6" }}
+          style={{ padding: "100px 0", borderBottom: "1px solid var(--line)" }}
         >
           <p
             ref={skillRef}
@@ -919,7 +1035,7 @@ export default function App() {
               fontWeight: 600,
               letterSpacing: "0.1em",
               textTransform: "uppercase",
-              color: "#9ca3af",
+              color: "var(--muted)",
               marginBottom: 48,
             }}
           >
@@ -956,7 +1072,7 @@ export default function App() {
                 fontWeight: 600,
                 letterSpacing: "0.1em",
                 textTransform: "uppercase",
-                color: "#9ca3af",
+                color: "var(--muted)",
                 marginBottom: 24,
               }}
             >
@@ -968,18 +1084,18 @@ export default function App() {
                 fontWeight: 700,
                 letterSpacing: "-0.04em",
                 lineHeight: 1.1,
-                color: "#111",
+                color: "var(--text)",
                 marginBottom: 20,
               }}
             >
               Let&apos;s build
               <br />
-              <span style={{ color: "#9ca3af" }}>something great.</span>
+              <span style={{ color: "var(--muted)" }}>something great.</span>
             </h2>
             <p
               style={{
                 fontSize: "0.95rem",
-                color: "#6b7280",
+                color: "var(--muted-2)",
                 lineHeight: 1.75,
                 maxWidth: 420,
                 marginBottom: 40,
@@ -1011,21 +1127,21 @@ export default function App() {
                     borderRadius: 10,
                     fontSize: "0.875rem",
                     fontWeight: 600,
-                    background: primary ? "#111" : "#fff",
-                    color: primary ? "#fff" : "#374151",
-                    border: primary ? "1px solid #111" : "1px solid #e5e7eb",
+                    background: primary ? "var(--primary-bg)" : "transparent",
+                    color: primary ? "var(--primary-text)" : "var(--secondary-text)",
+                    border: primary ? "1px solid var(--primary-bg)" : "1px solid var(--line)",
                     transition: "all 0.15s",
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.opacity = primary ? "0.82" : "1";
                     if (!primary) {
-                      e.currentTarget.style.borderColor = "#9ca3af";
+                      e.currentTarget.style.borderColor = "var(--muted)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.opacity = "1";
                     if (!primary) {
-                      e.currentTarget.style.borderColor = "#e5e7eb";
+                      e.currentTarget.style.borderColor = "var(--line)";
                     }
                   }}
                 >
@@ -1037,7 +1153,7 @@ export default function App() {
         </section>
       </main>
 
-      <footer style={{ borderTop: "1px solid #f3f4f6" }}>
+      <footer style={{ borderTop: "1px solid var(--line)" }}>
         <div
           className="footer-shell"
           style={{
@@ -1052,7 +1168,7 @@ export default function App() {
           }}
         >
           <span
-            style={{ fontSize: "0.78rem", color: "#d1d5db", fontWeight: 500 }}
+            style={{ fontSize: "0.78rem", color: "var(--faint)", fontWeight: 500 }}
           >
             © 2026 Saugat Adhikari - Monroe, Louisiana
           </span>
@@ -1071,18 +1187,81 @@ export default function App() {
                   : { target: "_blank", rel: "noreferrer" })}
                 style={{
                   fontSize: "0.78rem",
-                  color: "#9ca3af",
+                  color: "var(--muted)",
                   transition: "color 0.15s",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--muted)")}
               >
                 {label}
               </a>
             ))}
+            <button
+              type="button"
+              className="admin-button"
+              onClick={() => {
+                setAdminStatus("");
+                setAdminOpen(true);
+              }}
+            >
+              Admin
+            </button>
           </div>
         </div>
       </footer>
+      {adminOpen ? (
+        <div
+          className="admin-backdrop"
+          onClick={() => {
+            if (!adminBusy) setAdminOpen(false);
+          }}
+        >
+          <form
+            className="admin-panel"
+            onClick={(event) => event.stopPropagation()}
+            onSubmit={uploadResume}
+          >
+            <h2>Update resume</h2>
+            <p>Enter your admin code, then choose the PDF visitors should download.</p>
+            <label>
+              Code
+              <input
+                type="password"
+                name="code"
+                autoComplete="current-password"
+                value={adminCode}
+                onChange={(event) => setAdminCode(event.target.value)}
+                required
+              />
+            </label>
+            <label>
+              PDF
+              <input
+                type="file"
+                name="resume"
+                accept="application/pdf,.pdf"
+                onChange={(event) =>
+                  setAdminFile(event.target.files?.[0] ?? null)
+                }
+                required
+              />
+            </label>
+            {adminStatus ? <p className="admin-status">{adminStatus}</p> : null}
+            <div className="admin-actions">
+              <button
+                type="button"
+                onClick={() => setAdminOpen(false)}
+                disabled={adminBusy}
+              >
+                Cancel
+              </button>
+              <button type="submit" disabled={adminBusy}>
+                {adminBusy ? "Uploading" : "Upload"}
+              </button>
+            </div>
+          </form>
+        </div>
+      ) : null}
     </>
   );
 }
