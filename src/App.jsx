@@ -1,119 +1,120 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import profileImage from "./assets/profile.jpeg";
-import resumePdf from "./assets/SaugatAdhikariResumeV2.pdf";
+import resumePdf from "./assets/SaugatAdhikariResume.pdf";
 import { Analytics } from "@vercel/analytics/react";
 
 const LINKS = {
+  email: "mailto:adhikarisaugat34@gmail.com",
   github: "https://github.com/adk-saugat",
   linkedin: "https://linkedin.com/in/sau-gat",
   instagram: "https://instagram.com/adhikari_saugat_",
 };
 
-const FALLBACK_PROJECTS = [
+const PROJECTS = [
   {
     num: "01",
-    name: "GharFix",
-    tagline: "Home services, simplified.",
-    desc: "A mobile-first platform that connects homeowners with trusted local service professionals. Focused on transparency, real reviews, and on-demand booking - built end-to-end in TypeScript.",
-    stack: ["TypeScript", "React Native", "Node.js", "PostgreSQL"],
-    url: "https://github.com/adk-saugat/GharFix",
-    year: "2024",
+    name: "Rally",
+    detail: "Real-time location sharing",
+    desc: "A group location-sharing app built as Go microservices. gRPC and Protocol Buffers handle service communication, a WebSocket gateway streams live location to a React Native map, and PostgreSQL, Redis, and JWT cover persistence, pub/sub, and authentication. Docker Compose runs the services locally.",
+    stack: [
+      "Go",
+      "gRPC",
+      "Protocol Buffers",
+      "PostgreSQL",
+      "Redis",
+      "WebSockets",
+      "React Native",
+      "Docker",
+    ],
   },
   {
     num: "02",
-    name: "Stash",
-    tagline: "Version control for everyone.",
-    desc: "A lightweight CLI tool for file versioning and team collaboration. Snapshot your work, track changes, and sync with teammates - all from the terminal, built in Go for speed and portability.",
-    stack: ["Go", "CLI", "File I/O"],
-    url: "https://github.com/adk-saugat/Stash",
-    year: "2024",
+    name: "JobSync",
+    detail: "Job application tracker",
+    desc: "A full-stack tracker with a Go backend and React interface that organizes job applications from Gmail. The Gmail API and Gemini classify messages into statuses such as applied, interview, and rejected. Google Sign-In controls access, and Neon PostgreSQL stores each application.",
+    stack: [
+      "Go",
+      "React",
+      "PostgreSQL",
+      "Gmail API",
+      "Gemini API",
+      "Google OAuth",
+    ],
+    url: "https://github.com/adk-saugat/JobSync",
   },
   {
     num: "03",
-    name: "Mini-LMS",
-    tagline: "Teaching and learning, structured.",
-    desc: "A full-stack learning management system with role-based dashboards for instructors and students. Clean REST API backed by Go and PostgreSQL, with a React frontend.",
-    stack: ["React", "Go", "PostgreSQL", "REST API"],
-    url: "https://github.com/adk-saugat/Mini-LMS",
-    year: "2023",
-  },
-  {
-    num: "04",
-    name: "Gradual",
-    tagline: "Your academic second brain.",
-    desc: "A personal tracker and journal designed for college students to manage assignments, deadlines, study reflections, and project progress - all in one focused place.",
-    stack: ["TypeScript", "React", "Tailwind CSS"],
-    url: "https://github.com/adk-saugat/Gradual",
-    year: "2023",
+    name: "Stash",
+    detail: "Git-like version control",
+    desc: "A command-line version control system in Go for creating snapshots, tracking file history, and restoring earlier states. Remote push and pull keep versions synchronized across environments, with project setup and configuration included.",
+    stack: ["Go", "Gin", "PostgreSQL"],
+    url: "https://github.com/adk-saugat/Stash",
   },
 ];
 
-const GITHUB_USERNAME = "adk-saugat";
-const MAX_DISPLAY_PROJECTS = 6;
-const PINNED_REPO_NAMES = ["GharFix", "Stash", "Mini-LMS", "Gradual"];
-const PINNED_REPO_NAME_SET = new Set(
-  PINNED_REPO_NAMES.map((repoName) => repoName.toLowerCase()),
-);
-
-function mapReposToProjects(repos) {
-  return repos.slice(0, MAX_DISPLAY_PROJECTS).map((repo, index) => {
-    const stack = [repo.language, ...(repo.topics ?? []).slice(0, 3)].filter(
-      Boolean,
-    );
-    const description =
-      repo.description ?? "Open-source project built and maintained on GitHub.";
-
-    return {
-      num: String(index + 1).padStart(2, "0"),
-      name: repo.name,
-      tagline:
-        description.length > 58
-          ? `${description.slice(0, 58)}...`
-          : description,
-      desc: description,
-      stack: stack.length > 0 ? stack : ["GitHub"],
-      url: repo.html_url,
-      year: String(new Date(repo.updated_at).getFullYear()),
-    };
-  });
-}
+const HACKATHONS = [
+  {
+    num: "01",
+    name: "Litmus",
+    detail: "AI hiring pipeline",
+    desc: "An AI pipeline that compares a candidate's GitHub activity, LinkedIn experience, and portfolio projects with a job description to judge real coding habits and stack fit. Groq writes role-specific technical assessments, sent through token-gated email. Built with FastAPI, JWT auth, AWS S3, PostgreSQL, and a React 19 frontend.",
+    stack: ["Python", "FastAPI", "React", "PostgreSQL", "AWS S3", "Groq"],
+    url: "https://github.com/adk-saugat/Litmus",
+    year: "April 2026",
+  },
+  {
+    num: "02",
+    name: "Mindcare",
+    detail: "NLN Hackathon",
+    desc: "A mental wellbeing check-in platform for the Nepali Leaders Network hackathon. React and Go sit in front of ML-powered insights that offer supportive, non-diagnostic daily assessments, personalized tasks, and streak-based engagement.",
+    stack: ["React", "Go", "Machine Learning"],
+    url: "https://github.com/adk-saugat/Mindcare",
+    year: "March 2026",
+  },
+];
 
 const SKILLS = [
   {
     label: "Languages",
     items: [
-      { name: "TypeScript", icon: "TS", bg: "#3178c6", color: "#ffffff" },
-      { name: "JavaScript", icon: "JS", bg: "#f7df1e", color: "#111111" },
       { name: "Go", icon: "Go", bg: "#00add8", color: "#ffffff" },
-      { name: "Python", icon: "Py", bg: "#3776ab", color: "#ffffff" },
+      { name: "Java", icon: "Jv", bg: "#e76f00", color: "#ffffff" },
+      { name: "JavaScript", icon: "JS", bg: "#f7df1e", color: "#111111" },
+      { name: "TypeScript", icon: "TS", bg: "#3178c6", color: "#ffffff" },
     ],
   },
   {
-    label: "Frontend",
+    label: "Frameworks",
     items: [
+      { name: "Gin", icon: "Gi", bg: "#00add8", color: "#ffffff" },
       { name: "React", icon: "Re", bg: "#61dafb", color: "#111111" },
-      { name: "React Native", icon: "RN", bg: "#111111", color: "#ffffff" },
-      { name: "HTML & CSS", icon: "HC", bg: "#e34f26", color: "#ffffff" },
-      { name: "Tailwind", icon: "Tw", bg: "#06b6d4", color: "#ffffff" },
-    ],
-  },
-  {
-    label: "Backend",
-    items: [
+      { name: "Next.js", icon: "Nx", bg: "#111111", color: "#ffffff" },
       { name: "Node.js", icon: "Nd", bg: "#339933", color: "#ffffff" },
-      { name: "Go (Gin)", icon: "Gi", bg: "#00add8", color: "#ffffff" },
-      { name: "REST APIs", icon: "API", bg: "#4b5563", color: "#ffffff" },
-      { name: "PostgreSQL", icon: "Pg", bg: "#336791", color: "#ffffff" },
+      { name: "gRPC", icon: "gR", bg: "#244c5a", color: "#ffffff" },
+      { name: "Protocol Buffers", icon: "Pb", bg: "#4b5563", color: "#ffffff" },
+      { name: "REST APIs", icon: "API", bg: "#374151", color: "#ffffff" },
+      { name: "WebSockets", icon: "Ws", bg: "#0f766e", color: "#ffffff" },
     ],
   },
   {
-    label: "Tooling",
+    label: "Databases",
     items: [
-      { name: "Git", icon: "Gt", bg: "#f05032", color: "#ffffff" },
+      { name: "PostgreSQL", icon: "Pg", bg: "#336791", color: "#ffffff" },
+      { name: "SQLite", icon: "Sq", bg: "#003b57", color: "#ffffff" },
+      { name: "MongoDB", icon: "Mg", bg: "#47a248", color: "#ffffff" },
+      { name: "Redis", icon: "Rd", bg: "#dc382d", color: "#ffffff" },
+    ],
+  },
+  {
+    label: "Cloud & Tools",
+    items: [
+      { name: "AWS", icon: "AWS", bg: "#ff9900", color: "#111111" },
+      { name: "Google Cloud", icon: "GCP", bg: "#4285f4", color: "#ffffff" },
       { name: "Docker", icon: "Dk", bg: "#2496ed", color: "#ffffff" },
-      { name: "Linux", icon: "Lx", bg: "#111111", color: "#ffffff" },
-      { name: "Figma", icon: "Fg", bg: "#a259ff", color: "#ffffff" },
+      { name: "Git", icon: "Gt", bg: "#f05032", color: "#ffffff" },
+      { name: "GitHub", icon: "Gh", bg: "#111111", color: "#ffffff" },
+      { name: "Postman", icon: "Pm", bg: "#ff6c37", color: "#ffffff" },
     ],
   },
 ];
@@ -153,14 +154,16 @@ function useFade(delay = 0, rootMargin = "-60px") {
 function ProjectRow({ project, index }) {
   const [hovered, setHovered] = useState(false);
   const [ref, style] = useFade(index * 80);
+  const linked = Boolean(project.url);
+  const Row = linked ? "a" : "div";
 
   return (
     <div ref={ref} style={style}>
-      <a
+      <Row
         className="project-row"
-        href={project.url}
-        target="_blank"
-        rel="noreferrer"
+        {...(linked
+          ? { href: project.url, target: "_blank", rel: "noreferrer" }
+          : {})}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
@@ -169,6 +172,7 @@ function ProjectRow({ project, index }) {
           textDecoration: "none",
           color: "inherit",
           borderBottom: "1px solid #f3f4f6",
+          cursor: linked ? "pointer" : "default",
         }}
       >
         <div
@@ -213,45 +217,61 @@ function ProjectRow({ project, index }) {
                 >
                   {project.name}
                 </h3>
+                {project.detail ? (
+                  <p
+                    style={{
+                      margin: "6px 0 0",
+                      fontSize: "0.78rem",
+                      fontWeight: 500,
+                      color: "#9ca3af",
+                    }}
+                  >
+                    {project.detail}
+                  </p>
+                ) : null}
               </div>
               <div
                 style={{ display: "flex", alignItems: "center", gap: "8px" }}
               >
-                <span
-                  style={{
-                    fontSize: "0.72rem",
-                    color: "#d1d5db",
-                    fontWeight: 500,
-                  }}
-                >
-                  {project.year}
-                </span>
-                <div
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: "50%",
-                    border: `1px solid ${hovered ? "#111" : "#e5e7eb"}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    transition: "all 0.2s",
-                    background: hovered ? "#111" : "transparent",
-                    color: hovered ? "#fff" : "#9ca3af",
-                    flexShrink: 0,
-                  }}
-                >
-                  <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
+                {project.year ? (
+                  <span
+                    style={{
+                      fontSize: "0.72rem",
+                      color: "#d1d5db",
+                      fontWeight: 500,
+                    }}
                   >
-                    <path d="M7 17L17 7M17 7H7M17 7v10" />
-                  </svg>
-                </div>
+                    {project.year}
+                  </span>
+                ) : null}
+                {linked ? (
+                  <div
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      border: `1px solid ${hovered ? "#111" : "#e5e7eb"}`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      transition: "all 0.2s",
+                      background: hovered ? "#111" : "transparent",
+                      color: hovered ? "#fff" : "#9ca3af",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <path d="M7 17L17 7M17 7H7M17 7v10" />
+                    </svg>
+                  </div>
+                ) : null}
               </div>
             </div>
             <p
@@ -285,7 +305,7 @@ function ProjectRow({ project, index }) {
             </div>
           </div>
         </div>
-      </a>
+      </Row>
     </div>
   );
 }
@@ -353,53 +373,11 @@ function SkillGroup({ label, items, index }) {
 
 export default function App() {
   const [scrolled, setScrolled] = useState(false);
-  const [projects, setProjects] = useState(FALLBACK_PROJECTS);
-  const [repoCount, setRepoCount] = useState(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadGithubProjects() {
-      try {
-        const response = await fetch(
-          `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`,
-          {
-            headers: {
-              Accept: "application/vnd.github+json",
-              "X-GitHub-Api-Version": "2022-11-28",
-            },
-            signal: controller.signal,
-          },
-        );
-
-        if (!response.ok) {
-          return;
-        }
-
-        const repos = await response.json();
-        const publicRepos = repos.filter((repo) => !repo.fork);
-        const pinnedRepos = publicRepos.filter((repo) =>
-          PINNED_REPO_NAME_SET.has(repo.name.toLowerCase()),
-        );
-        setRepoCount(pinnedRepos.length);
-
-        const mappedProjects = mapReposToProjects(pinnedRepos);
-        if (mappedProjects.length > 0) {
-          setProjects(mappedProjects);
-        }
-      } catch {
-        // Keep fallback projects if GitHub API is unavailable.
-      }
-    }
-
-    loadGithubProjects();
-    return () => controller.abort();
   }, []);
 
   const [heroRef, heroStyle] = useFade(0, "0px");
@@ -530,7 +508,7 @@ export default function App() {
                       background: "#22c55e",
                     }}
                   />
-                  Available for opportunities
+                  Open to roles · graduating May 2027
                 </div>
                 <h1
                   className="hero-name"
@@ -576,9 +554,9 @@ export default function App() {
                   <strong style={{ color: "#111", fontWeight: 600 }}>
                     Saugat Adhikari
                   </strong>
-                  , a developer based in Monroe, Louisiana. I build clean,
-                  purposeful software - from mobile platforms to developer
-                  tools.
+                  , a computer science student at the University of Louisiana
+                  Monroe. I build full-stack software in Go and React, from
+                  real-time services to the tools I use myself.
                 </p>
                 <div
                   className="hero-cta"
@@ -617,7 +595,7 @@ export default function App() {
                   </a>
                   <a
                     href={resumePdf}
-                    download
+                    download="SaugatAdhikariResume.pdf"
                     style={{
                       display: "inline-flex",
                       alignItems: "center",
@@ -730,7 +708,7 @@ export default function App() {
                   color: "#111",
                 }}
               >
-                I build things that solve real problems.
+                I build systems that have to hold up in real use.
               </h2>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
@@ -741,10 +719,10 @@ export default function App() {
                   lineHeight: 1.85,
                 }}
               >
-                I&apos;m a full-stack developer who enjoys the entire process -
-                from sketching a system design to shipping a polished user
-                interface. I care about writing code that is readable,
-                maintainable, and genuinely useful.
+                I&apos;m finishing a B.S. in Computer Science at the University
+                of Louisiana Monroe in May 2027, with a 3.97 GPA. Coursework
+                includes artificial intelligence, data structures and
+                algorithms, files and databases, and operating systems.
               </p>
               <p
                 style={{
@@ -753,24 +731,74 @@ export default function App() {
                   lineHeight: 1.85,
                 }}
               >
-                My work spans developer tooling, web apps, mobile platforms, and
-                APIs. I&apos;m comfortable across the stack - equally at home in
-                a Go backend as in a React frontend.
+                Most of that work is a Go service behind a React or React
+                Native client: live location streaming, a job tracker wired to
+                Gmail and Gemini, and a Git-like CLI. I&apos;m also an AWS
+                Certified AI Practitioner.
               </p>
+              <div
+                className="edu-stats"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                  gap: 12,
+                  paddingTop: 8,
+                }}
+              >
+                {[
+                  ["School", "University of Louisiana Monroe"],
+                  ["Degree", "B.S. Computer Science"],
+                  ["GPA", "3.97 / 4.0"],
+                ].map(([label, value]) => (
+                  <div
+                    key={label}
+                    style={{
+                      border: "1px solid #e5e7eb",
+                      borderRadius: 10,
+                      padding: "12px 14px",
+                      background: "#fcfcfd",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "0.68rem",
+                        fontWeight: 700,
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        color: "#9ca3af",
+                        marginBottom: 6,
+                      }}
+                    >
+                      {label}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "0.84rem",
+                        fontWeight: 600,
+                        color: "#111",
+                        lineHeight: 1.4,
+                      }}
+                    >
+                      {value}
+                    </p>
+                  </div>
+                ))}
+              </div>
               <div
                 className="about-links"
                 style={{ display: "flex", gap: 20, paddingTop: 8 }}
               >
                 {[
+                  ["Email", LINKS.email],
                   ["LinkedIn", LINKS.linkedin],
                   ["GitHub", LINKS.github],
-                  ["Instagram", LINKS.instagram],
                 ].map(([label, href]) => (
                   <a
                     key={label}
                     href={href}
-                    target="_blank"
-                    rel="noreferrer"
+                    {...(href.startsWith("mailto:")
+                      ? {}
+                      : { target: "_blank", rel: "noreferrer" })}
                     style={{
                       fontSize: "0.83rem",
                       fontWeight: 600,
@@ -840,7 +868,7 @@ export default function App() {
               onMouseEnter={(e) => (e.currentTarget.style.color = "#111")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#9ca3af")}
             >
-              {`Pinned projects on GitHub${repoCount ? ` (${repoCount})` : ""}`}
+              More on GitHub
               <svg
                 width="12"
                 height="12"
@@ -854,7 +882,25 @@ export default function App() {
             </a>
           </div>
           <div style={{ borderTop: "1px solid #f3f4f6" }}>
-            {projects.map((project, i) => (
+            {PROJECTS.map((project, i) => (
+              <ProjectRow key={project.name} project={project} index={i} />
+            ))}
+          </div>
+          <p
+            style={{
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "#9ca3af",
+              marginTop: 56,
+              marginBottom: 8,
+            }}
+          >
+            Hackathons
+          </p>
+          <div style={{ borderTop: "1px solid #f3f4f6" }}>
+            {HACKATHONS.map((project, i) => (
               <ProjectRow key={project.name} project={project} index={i} />
             ))}
           </div>
@@ -939,23 +985,24 @@ export default function App() {
                 marginBottom: 40,
               }}
             >
-              Open to freelance work, full-time roles, and interesting
-              collaborations. Drop me a message - I usually reply quickly.
+              Open to new-grad roles and internships. The fastest way to
+              reach me is email.
             </p>
             <div
               className="contact-actions"
               style={{ display: "flex", gap: 12, flexWrap: "wrap" }}
             >
               {[
-                { label: "LinkedIn", href: LINKS.linkedin, primary: true },
+                { label: "Email", href: LINKS.email, primary: true },
+                { label: "LinkedIn", href: LINKS.linkedin, primary: false },
                 { label: "GitHub", href: LINKS.github, primary: false },
-                { label: "Instagram", href: LINKS.instagram, primary: false },
               ].map(({ label, href, primary }) => (
                 <a
                   key={label}
                   href={href}
-                  target="_blank"
-                  rel="noreferrer"
+                  {...(href.startsWith("mailto:")
+                    ? {}
+                    : { target: "_blank", rel: "noreferrer" })}
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
@@ -1011,6 +1058,7 @@ export default function App() {
           </span>
           <div className="footer-links" style={{ display: "flex", gap: 20 }}>
             {[
+              ["Email", LINKS.email],
               ["GitHub", LINKS.github],
               ["LinkedIn", LINKS.linkedin],
               ["Instagram", LINKS.instagram],
@@ -1018,8 +1066,9 @@ export default function App() {
               <a
                 key={label}
                 href={href}
-                target="_blank"
-                rel="noreferrer"
+                {...(href.startsWith("mailto:")
+                  ? {}
+                  : { target: "_blank", rel: "noreferrer" })}
                 style={{
                   fontSize: "0.78rem",
                   color: "#9ca3af",

@@ -136,6 +136,10 @@ a {
     gap: 28px !important;
   }
 
+  .edu-stats {
+    grid-template-columns: 1fr !important;
+  }
+
   .about-links {
     flex-wrap: wrap !important;
     gap: 12px !important;
